@@ -117,3 +117,29 @@ posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
 
 cria_ponte((X1, Y1), (X2, Y2), ponte((X1, Y1), (X2, Y2))) :- (X1<X2 ; (X1==X2, Y1<Y2)), !.
 cria_ponte((X1, Y1), (X2, Y2), ponte((X2, Y2), (X1, Y1))) :- (X1>X2 ; (X1==X2, Y1>Y2)).
+
+% 2.7 Predicado caminho_livre/5
+
+caminho_livre(Pos1, Pos2, _, ilha(_,Pos_I), ilha(_,Pos_Vz)) :-
+    Pos1 == Pos_I,
+    Pos2 == Pos_Vz,
+    !.
+
+caminho_livre(_, _, Posicoes, ilha(_,Pos_I), ilha(_,Pos_Vz)) :-
+    posicoes_entre(Pos_I,Pos_Vz,Pos_Entre),
+    \+ (member(Pos, Posicoes),
+    member(Pos, Pos_Entre)).
+
+% 2.8 Predicado actualiza_vizinhas_entrada/5
+
+actualiza_vizinhas_entrada(Pos1, Pos2, Posicoes, [Ilha, Vizinhas, Pontes], [Ilha, NovasVizinhas, Pontes]) :-
+    findall(Vizinha, (member(Vizinha,Vizinhas), caminho_livre(Pos1,Pos2,Posicoes, Ilha, Vizinha)), NovasVizinhas).
+
+% 2.9 Predicado actualiza_vizinhas_apos_pontes/4
+
+actualiza_vizinhas_apos_pontes([],_,_,[]).
+
+actualiza_vizinhas_apos_pontes([Entrada | Resto_Estado], Pos1, Pos2, [NovaEntrada | Resto_Novo_Estado]) :-
+    posicoes_entre(Pos1, Pos2, Posicoes),
+    actualiza_vizinhas_entrada(Pos1, Pos2, Posicoes, Entrada, NovaEntrada),
+    actualiza_vizinhas_apos_pontes(Resto_Estado, Pos1, Pos2, Resto_Novo_Estado).
