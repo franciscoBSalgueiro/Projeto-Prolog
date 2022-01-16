@@ -1,3 +1,5 @@
+% 2.1 Predicado extrai_ilhas_linha/3
+
 extrai_ilhas_linha(N_L, Linha, Ilhas) :- extrai_ilhas_linha(N_L, Linha, Ilhas, 1).
 
 extrai_ilhas_linha(_, [], [], _).
@@ -14,15 +16,26 @@ extrai_ilhas_linha(N_L, [Coluna | Linha], Ilhas, N_C) :-
     N_C2 is N_C+1,
     extrai_ilhas_linha(N_L, Linha, Ilhas, N_C2).
 
-posicoes_entre(Pos1, Pos2, Posicoes) :-
-    (PX1, PY1) = Pos1, 
-    (PX2, PY2) = Pos2,
-    (PX1==PX2 ; PY1==PY2),
-    findall((X,Y), 
-    (between(PX1, PX2, X), between(PY1, PY2, Y)),
-    Posicoes).
+% 2.2 Predicado ilhas/2
 
-% :- posicoes_entre((2,6), (1,6), Posicoes), writeln(Posicoes); writeln(false).
-% output: [(1,3),(1,4),(1,5)]
-:- posicoes_entre((2,6), (8,6), Posicoes), writeln(Posicoes); writeln(false).
-% output: [(3,6),(4,6),(5,6),(6,6),(7,6)]
+ilhas(Puz, Ilhas_Final) :- ilhas(Puz, Ilhas, 1),
+    append(Ilhas, Ilhas_Final).
+
+ilhas([],[],_).
+
+ilhas([L | R], [Ilhas_Linha | Ilhas_Resto], I) :-
+    extrai_ilhas_linha(I, L, Ilhas_Linha),
+    NI is I+1,
+    ilhas(R, Ilhas_Resto, NI).
+
+% 2.5 Predicado posicoes_entre/3
+
+posicoes_entre((X, PY1), (X, PY2), Posicoes) :-
+    Y1 is PY1+1,
+    Y2 is PY2-1,
+    findall((X,Y), between(Y1, Y2, Y), Posicoes).
+
+posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
+    X1 is PX1+1,
+    X2 is PX2-1,
+    findall((X,Y), between(X1, X2, X), Posicoes).
