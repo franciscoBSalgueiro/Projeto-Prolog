@@ -1,4 +1,4 @@
-% Francisco Salgueiro - nº 103345
+% Francisco Salgueiro - num 103345
 
 % 2.1 Predicado extrai_ilhas_linha/3
 
@@ -78,8 +78,8 @@ vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
 
     findall(
         IlhaVizinha, 
-        (   
-            member(IlhaVizinha, Ilhas), 
+        (
+            member(IlhaVizinha, Ilhas),
             IlhaVizinha = ilha(_, (PY2, PX2)), 
             (
                 (PY1 == PY2, PX1<PX2)
@@ -105,11 +105,21 @@ estado([Ilha | Resto], [[Ilha, Vizinhas, []] | RestoEstado], Ilhas) :-
 % 2.5 Predicado posicoes_entre/3
 
 posicoes_entre((X, PY1), (X, PY2), Posicoes) :-
+    PY1>PY2,
+    posicoes_entre((X, PY2), (X, PY1), Posicoes).
+
+posicoes_entre((X, PY1), (X, PY2), Posicoes) :-
+    PY1<PY2,
     Y1 is PY1+1,
     Y2 is PY2-1,
     findall((X,Y), between(Y1, Y2, Y), Posicoes).
 
 posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
+    PX1>PX2,
+    posicoes_entre((PX2, Y), (PX1, Y), Posicoes).
+
+posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
+    PX1<PX2,
     X1 is PX1+1,
     X2 is PX2-1,
     findall((X,Y), between(X1, X2, X), Posicoes).
