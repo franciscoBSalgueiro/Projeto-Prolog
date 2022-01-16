@@ -92,8 +92,13 @@ vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
 
 % 2.4 Predicado estado/2
 
-estado(Ilhas, Estado) :-
-    findall(Estado_Ilha, (member(Ilha, Ilhas), vizinhas(Ilhas, Ilha, Vizinhas), Estado_Ilha = [Ilha, Vizinhas, []]), Estado).
+estado(Ilhas, Estado) :- estado(Ilhas, Estado, Ilhas).
+
+estado([], [], _).
+
+estado([Ilha | Resto], [[Ilha, Vizinhas, []] | RestoEstado], Ilhas) :-
+    vizinhas(Ilhas, Ilha, Vizinhas),
+    estado(Resto,RestoEstado,Ilhas).
 
 % 2.5 Predicado posicoes_entre/3
 
