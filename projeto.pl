@@ -30,38 +30,70 @@ ilhas([L | R], [Ilhas_Linha | Ilhas_Resto], I) :-
 
 % 2.3 Predicado vizinhas/3
 
-vizinhas(Ilhas, ilha(_, (PX1, PY1)), Vizinhas) :-
+vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
     findall(
         IlhaVizinha, 
         (   
             member(IlhaVizinha, Ilhas), 
-            IlhaVizinha = ilha(_, (PX2, PY2)), 
+            IlhaVizinha = ilha(_, (PY2, PX2)), 
             (
-                (PX1 == PX2, PY1\=PY2);
-                (PY1 == PY2, PX1\=PX2)
+                (PX1 == PX2, PY1>PY2)
             )
-            
+         
         ), 
-        Vizinhas
-    ).
+        IlhaCima
+    ),
+    (last(IlhaCima, UltimaCima), Cima = [UltimaCima] ; Cima = []),
+    
 
-% :- Ilhas = [ilha(2,(1,3)),ilha(1,(3,1)),ilha(6,(3,3)),ilha(1,(3,5)),ilha(2,(5,3))], vizinhas(Ilhas, ilha(1, (3, 1)), Vizinhas), writeln(Vizinhas); writeln(false).
-% % output: [ilha(6,(3,3))]
-% :- Ilhas = [ilha(2,(1,3)),ilha(1,(3,1)),ilha(6,(3,3)),ilha(1,(3,5)),ilha(2,(5,3))], vizinhas(Ilhas, ilha(6, (3, 3)), Vizinhas), writeln(Vizinhas); writeln(false).
-% % output: [ilha(2,(1,3)),ilha(1,(3,1)),ilha(1,(3,5)),ilha(2,(5,3))]
+    findall(
+        IlhaVizinha, 
+        (   
+            member(IlhaVizinha, Ilhas), 
+            IlhaVizinha = ilha(_, (PY2, PX2)), 
+            (
+                (PX1 == PX2, PY1<PY2)
+            )
+         
+        ), 
+        IlhaBaixo
+    ),
+    (IlhaBaixo = [UltimaBaixo | _], Baixo = [UltimaBaixo] ; Baixo = []),
 
-% :- Ilhas = [ilha(1,(1,1)),ilha(4,(1,3)),ilha(1,(1,5)),ilha(2,(3,3))], vizinhas(Ilhas, ilha(4, (1, 3)), Vizinhas), writeln(Vizinhas); writeln(false). 
-% % output: [ilha(1,(1,1)),ilha(1,(1,5)),ilha(2,(3,3))]
+    findall(
+        IlhaVizinha, 
+        (   
+            member(IlhaVizinha, Ilhas), 
+            IlhaVizinha = ilha(_, (PY2, PX2)), 
+            (
+                (PY1 == PY2, PX1>PX2)
+            )
+         
+        ), 
+        IlhaEsquerda
+    ),
+    (last(IlhaEsquerda, UltimaEsquerda), Esquerda = [UltimaEsquerda] ; Esquerda = []),
 
+    findall(
+        IlhaVizinha, 
+        (   
+            member(IlhaVizinha, Ilhas), 
+            IlhaVizinha = ilha(_, (PY2, PX2)), 
+            (
+                (PY1 == PY2, PX1<PX2)
+            )
+         
+        ), 
+        IlhaDireita
+    ),
+    (IlhaDireita = [UltimaDireita | _], Direita = [UltimaDireita] ; Direita = []),
+    
+    append([Cima, Esquerda, Direita, Baixo], Vizinhas).
 
 % 2.4 Predicado estado/2
 
 estado(Ilhas, Estado) :-
     findall(Estado_Ilha, (member(Ilha, Ilhas), vizinhas(Ilhas, Ilha, Vizinhas), Estado_Ilha = [Ilha, Vizinhas, []]), Estado).
-
-:- Ilhas = [ilha(2,(1,3)),ilha(1,(3,1)),ilha(6,(3,3)),ilha(1,(3,5)),ilha(2,(5,3))], estado(Ilhas, Estado), writeln(Estado); writeln(false).  
-% output: [[ilha(2,(1,3)),[ilha(6,(3,3))],[]],[ilha(1,(3,1)),[ilha(6,(3,3))],[]],[ilha(6,(3,3)),[ilha(2,(1,3)),ilha(1,(3,1)),ilha(1,(3,5)),ilha(2,(5,3))],[]],[ilha(1,(3,5)),[ilha(6,(3,3))],[]],[ilha(2,(5,3)),[ilha(6,(3,3))],[]]]
-
 
 % 2.5 Predicado posicoes_entre/3
 
