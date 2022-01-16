@@ -28,6 +28,41 @@ ilhas([L | R], [Ilhas_Linha | Ilhas_Resto], I) :-
     NI is I+1,
     ilhas(R, Ilhas_Resto, NI).
 
+% 2.3 Predicado vizinhas/3
+
+vizinhas(Ilhas, ilha(_, (PX1, PY1)), Vizinhas) :-
+    findall(
+        IlhaVizinha, 
+        (   
+            member(IlhaVizinha, Ilhas), 
+            IlhaVizinha = ilha(_, (PX2, PY2)), 
+            (
+                (PX1 == PX2, PY1\=PY2);
+                (PY1 == PY2, PX1\=PX2)
+            )
+            
+        ), 
+        Vizinhas
+    ).
+
+% :- Ilhas = [ilha(2,(1,3)),ilha(1,(3,1)),ilha(6,(3,3)),ilha(1,(3,5)),ilha(2,(5,3))], vizinhas(Ilhas, ilha(1, (3, 1)), Vizinhas), writeln(Vizinhas); writeln(false).
+% % output: [ilha(6,(3,3))]
+% :- Ilhas = [ilha(2,(1,3)),ilha(1,(3,1)),ilha(6,(3,3)),ilha(1,(3,5)),ilha(2,(5,3))], vizinhas(Ilhas, ilha(6, (3, 3)), Vizinhas), writeln(Vizinhas); writeln(false).
+% % output: [ilha(2,(1,3)),ilha(1,(3,1)),ilha(1,(3,5)),ilha(2,(5,3))]
+
+% :- Ilhas = [ilha(1,(1,1)),ilha(4,(1,3)),ilha(1,(1,5)),ilha(2,(3,3))], vizinhas(Ilhas, ilha(4, (1, 3)), Vizinhas), writeln(Vizinhas); writeln(false). 
+% % output: [ilha(1,(1,1)),ilha(1,(1,5)),ilha(2,(3,3))]
+
+
+% 2.4 Predicado estado/2
+
+estado(Ilhas, Estado) :-
+    findall(Estado_Ilha, (member(Ilha, Ilhas), vizinhas(Ilhas, Ilha, Vizinhas), Estado_Ilha = [Ilha, Vizinhas, []]), Estado).
+
+:- Ilhas = [ilha(2,(1,3)),ilha(1,(3,1)),ilha(6,(3,3)),ilha(1,(3,5)),ilha(2,(5,3))], estado(Ilhas, Estado), writeln(Estado); writeln(false).  
+% output: [[ilha(2,(1,3)),[ilha(6,(3,3))],[]],[ilha(1,(3,1)),[ilha(6,(3,3))],[]],[ilha(6,(3,3)),[ilha(2,(1,3)),ilha(1,(3,1)),ilha(1,(3,5)),ilha(2,(5,3))],[]],[ilha(1,(3,5)),[ilha(6,(3,3))],[]],[ilha(2,(5,3)),[ilha(6,(3,3))],[]]]
+
+
 % 2.5 Predicado posicoes_entre/3
 
 posicoes_entre((X, PY1), (X, PY2), Posicoes) :-
@@ -39,3 +74,9 @@ posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
     X1 is PX1+1,
     X2 is PX2-1,
     findall((X,Y), between(X1, X2, X), Posicoes).
+
+
+% 2.6 Predicado cria_ponte/3
+
+cria_ponte((X1, Y1), (X2, Y2), ponte((X1, Y1), (X2, Y2))) :- (X1<X2 ; (X1==X2, Y1<Y2)), !.
+cria_ponte((X1, Y1), (X2, Y2), ponte((X2, Y2), (X1, Y1))) :- (X1>X2 ; (X1==X2, Y1>Y2)).
