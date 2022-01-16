@@ -1,3 +1,5 @@
+% Francisco Salgueiro - nº 103345
+
 % 2.1 Predicado extrai_ilhas_linha/3
 
 extrai_ilhas_linha(N_L, Linha, Ilhas) :- extrai_ilhas_linha(N_L, Linha, Ilhas, 1).
@@ -143,3 +145,69 @@ actualiza_vizinhas_apos_pontes([Entrada | Resto_Estado], Pos1, Pos2, [NovaEntrad
     posicoes_entre(Pos1, Pos2, Posicoes),
     actualiza_vizinhas_entrada(Pos1, Pos2, Posicoes, Entrada, NovaEntrada),
     actualiza_vizinhas_apos_pontes(Resto_Estado, Pos1, Pos2, Resto_Novo_Estado).
+
+% 2.10 Predicado ilhas_terminadas/2
+
+ilhas_terminadas(Estado, Ilhas_term) :-
+    findall(Ilha, (member([Ilha,_,L], Estado), Ilha = ilha(V,_), integer(V), length(L, V)), Ilhas_term).
+
+% 2.11 Predicado tira_ilhas_terminadas_entrada/3
+
+tira_ilhas_terminadas_entrada(Ilhas_term, [Ilha, Vizinhas, Pontes], [Ilha, NovasVizinhas, Pontes]) :-
+    findall(IlhaNaoTerminada, (member(IlhaNaoTerminada, Vizinhas), \+ member(IlhaNaoTerminada, Ilhas_term)), NovasVizinhas).
+
+% 2.12 Predicado tira_ilhas_terminadas/3
+
+tira_ilhas_terminadas(Estado, Ilhas_term, Novo_estado) :-
+    findall(NovaEntrada, (member(Entrada, Estado),  tira_ilhas_terminadas_entrada(Ilhas_term,Entrada, NovaEntrada)), Novo_estado).
+
+% 2.13 Predicado marca_ilhas_terminadas_entrada/3
+
+marca_ilhas_terminadas_entrada(Ilhas_term, [ilha(V, Pos), Vizinhas, Pontes], [ilha('X', Pos), Vizinhas, Pontes]) :-
+    member(ilha(V, Pos), Ilhas_term),
+    !.
+
+marca_ilhas_terminadas_entrada(_,Entrada,Entrada).
+
+% 2.14 Predicado marca_ilhas_terminadas/3
+
+marca_ilhas_terminadas(Estado, Ilhas_term, Novo_estado) :-
+    findall(NovaEntrada, (member(Entrada, Estado),  marca_ilhas_terminadas_entrada(Ilhas_term,Entrada, NovaEntrada)), Novo_estado).
+
+% 2.15 Predicado trata_ilhas_terminadas/2
+
+trata_ilhas_terminadas(Estado, Novo_estado) :- 
+    ilhas_terminadas(Estado,Ilhas_term),
+    tira_ilhas_terminadas(Estado,Ilhas_term,Estado2),
+    marca_ilhas_terminadas(Estado2,Ilhas_term,Novo_estado).
+
+% 2.16 Predicado junta_pontes/5
+
+adiciona_ponte_entrada([Ilha1, Vizinhas, _], Num_pontes, Ilha1, Ilha2, [Ilha1, Vizinhas, NovasPontes]) :-
+    Ilha1 = ilha(_,Pos1), Ilha2= ilha(_,Pos2),
+    cria_ponte(Pos1,Pos2,Ponte),
+    findall(Ponte, between(1, Num_pontes, _), NovasPontes),
+    !.
+
+adiciona_ponte_entrada([Ilha2, Vizinhas, _], Num_pontes, Ilha1, Ilha2, [Ilha2, Vizinhas, NovasPontes]) :-
+    Ilha1 = ilha(_,Pos1), Ilha2= ilha(_,Pos2),
+    cria_ponte(Pos1,Pos2,Ponte),
+    findall(Ponte, between(1, Num_pontes, _), NovasPontes),
+    !.
+
+adiciona_ponte_entrada([Ilha, Vizinhas, Pontes], _, Ilha1, Ilha2, [Ilha, Vizinhas, Pontes]) :-
+    Ilha\=Ilha1,
+    Ilha\=Ilha2.
+
+adiciona_ponte([], _ ,_ ,_, []).
+
+adiciona_ponte([Entrada | RestoEntrada], Num_pontes, Ilha1, Ilha2, [NovaEntrada | RestoNovaEntrada]) :-
+    adiciona_ponte_entrada(Entrada,Num_pontes,Ilha1,Ilha2,NovaEntrada),
+    adiciona_ponte(RestoEntrada, Num_pontes, Ilha1, Ilha2, RestoNovaEntrada).
+
+junta_pontes(Estado, Num_pontes, Ilha1, Ilha2, Novo_estado) :-
+    adiciona_ponte(Estado, Num_pontes, Ilha1, Ilha2, Estado2),
+    Ilha1 = ilha(_, Pos1),
+    Ilha2 = ilha(_, Pos2),
+    actualiza_vizinhas_apos_pontes(Estado2,Pos1,Pos2,Estado3),
+    trata_ilhas_terminadas(Estado3,Novo_estado).
