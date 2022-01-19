@@ -132,10 +132,8 @@ cria_ponte((X1, Y1), (X2, Y2), ponte((X2, Y2), (X1, Y1))) :- (X1>X2 ; (X1==X2, Y
 
 % 2.7 Predicado caminho_livre/5
 
-caminho_livre(Pos1, Pos2, _, ilha(_,Pos_I), ilha(_,Pos_Vz)) :-
-    Pos1 == Pos_I,
-    Pos2 == Pos_Vz,
-    !.
+caminho_livre(Pos1, Pos2, _, ilha(_,Pos1), ilha(_,Pos2)).
+caminho_livre(Pos1, Pos2, _, ilha(_,Pos2), ilha(_,Pos1)).
 
 caminho_livre(_, _, Posicoes, ilha(_,Pos_I), ilha(_,Pos_Vz)) :-
     posicoes_entre(Pos_I,Pos_Vz,Pos_Entre),
