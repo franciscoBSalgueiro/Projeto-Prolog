@@ -42,18 +42,24 @@ esquerda(PX1, PY1, ilha(_, (PY1, PX2))) :-
 direita(PX1, PY1, ilha(_, (PY1, PX2))) :-
     PX1<PX2.
 
+ultimo_em_lista(Ilhas,UltimaLista) :-
+    (last(Ilhas, Ultima), UltimaLista = [Ultima] ; UltimaLista = []).
+
+primeiro_em_lista(Ilhas,UltimaLista) :-
+    (Ilhas = [Ultima | _], UltimaLista = [Ultima] ; UltimaLista = []).
+
 vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
     include(cima(PX1, PY1),Ilhas,IlhaCima),
-    (last(IlhaCima, UltimaCima), Cima = [UltimaCima] ; Cima = []),
+    ultimo_em_lista(IlhaCima,Cima),
 
     include(baixo(PX1, PY1),Ilhas,IlhaBaixo),
-    (IlhaBaixo = [UltimaBaixo | _], Baixo = [UltimaBaixo] ; Baixo = []),
+    primeiro_em_lista(IlhaBaixo,Baixo),
 
     include(esquerda(PX1, PY1),Ilhas,IlhaEsquerda),
-    (last(IlhaEsquerda, UltimaEsquerda), Esquerda = [UltimaEsquerda] ; Esquerda = []),
+    ultimo_em_lista(IlhaEsquerda,Esquerda),
 
     include(direita(PX1, PY1),Ilhas,IlhaDireita),
-    (IlhaDireita = [UltimaDireita | _], Direita = [UltimaDireita] ; Direita = []),
+    primeiro_em_lista(IlhaDireita,Direita),
     
     append([Cima, Esquerda, Direita, Baixo], Vizinhas).
 
