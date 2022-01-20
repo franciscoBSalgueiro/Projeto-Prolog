@@ -6,12 +6,10 @@ extrai_ilhas_linha(N_L, Linha, Ilhas) :- extrai_ilhas_linha(N_L, Linha, Ilhas, 1
 
 extrai_ilhas_linha(_, [], [], _).
 
-extrai_ilhas_linha(N_L, [Coluna | Linha], Ilhas, N_C) :-
+extrai_ilhas_linha(N_L, [Coluna | Linha], [ilha(Coluna,(N_L,N_C)) | Ilhas], N_C) :-
     Coluna\=0,
-    !,
     N_C2 is N_C+1,
-    extrai_ilhas_linha(N_L, Linha, Ilhas2, N_C2),
-    append([ilha(Coluna,(N_L,N_C))], Ilhas2, Ilhas).
+    extrai_ilhas_linha(N_L, Linha, Ilhas, N_C2).
 
 extrai_ilhas_linha(N_L, [Coluna | Linha], Ilhas, N_C) :-
     Coluna==0,
@@ -32,62 +30,29 @@ ilhas([L | R], [Ilhas_Linha | Ilhas_Resto], I) :-
 
 % 2.3 Predicado vizinhas/3
 
-vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
-    findall(
-        IlhaVizinha, 
-        (   
-            member(IlhaVizinha, Ilhas), 
-            IlhaVizinha = ilha(_, (PY2, PX2)), 
-            (
-                (PX1 == PX2, PY1>PY2)
-            )
-         
-        ), 
-        IlhaCima
-    ),
-    (last(IlhaCima, UltimaCima), Cima = [UltimaCima] ; Cima = []),
-    
+cima(PX1, PY1, ilha(_, (PY2, PX1))) :-
+    PY1>PY2.
 
-    findall(
-        IlhaVizinha, 
-        (   
-            member(IlhaVizinha, Ilhas), 
-            IlhaVizinha = ilha(_, (PY2, PX2)), 
-            (
-                (PX1 == PX2, PY1<PY2)
-            )
-         
-        ), 
-        IlhaBaixo
-    ),
+baixo(PX1, PY1, ilha(_, (PY2, PX1))) :-
+    PY1<PY2.
+
+esquerda(PX1, PY1, ilha(_, (PY1, PX2))) :-
+    PX1>PX2.
+
+direita(PX1, PY1, ilha(_, (PY1, PX2))) :-
+    PX1<PX2.
+
+vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
+    include(cima(PX1, PY1),Ilhas,IlhaCima),
+    (last(IlhaCima, UltimaCima), Cima = [UltimaCima] ; Cima = []),
+
+    include(baixo(PX1, PY1),Ilhas,IlhaBaixo),
     (IlhaBaixo = [UltimaBaixo | _], Baixo = [UltimaBaixo] ; Baixo = []),
 
-    findall(
-        IlhaVizinha, 
-        (   
-            member(IlhaVizinha, Ilhas), 
-            IlhaVizinha = ilha(_, (PY2, PX2)), 
-            (
-                (PY1 == PY2, PX1>PX2)
-            )
-         
-        ), 
-        IlhaEsquerda
-    ),
+    include(esquerda(PX1, PY1),Ilhas,IlhaEsquerda),
     (last(IlhaEsquerda, UltimaEsquerda), Esquerda = [UltimaEsquerda] ; Esquerda = []),
 
-    findall(
-        IlhaVizinha, 
-        (
-            member(IlhaVizinha, Ilhas),
-            IlhaVizinha = ilha(_, (PY2, PX2)), 
-            (
-                (PY1 == PY2, PX1<PX2)
-            )
-         
-        ), 
-        IlhaDireita
-    ),
+    include(direita(PX1, PY1),Ilhas,IlhaDireita),
     (IlhaDireita = [UltimaDireita | _], Direita = [UltimaDireita] ; Direita = []),
     
     append([Cima, Esquerda, Direita, Baixo], Vizinhas).
