@@ -76,25 +76,14 @@ estado([Ilha | Resto], [[Ilha, Vizinhas, []] | RestoEstado], Ilhas) :-
 % 2.5 Predicado posicoes_entre/3
 
 posicoes_entre((X, PY1), (X, PY2), Posicoes) :-
-    PY1>PY2,
-    posicoes_entre((X, PY2), (X, PY1), Posicoes).
-
-posicoes_entre((X, PY1), (X, PY2), Posicoes) :-
-    PY1<PY2,
-    Y1 is PY1+1,
-    Y2 is PY2-1,
+    Y1 is min(PY1,PY2)+1,
+    Y2 is max(PY1,PY2)-1,
     findall((X,Y), between(Y1, Y2, Y), Posicoes).
 
 posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
-    PX1>PX2,
-    posicoes_entre((PX2, Y), (PX1, Y), Posicoes).
-
-posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
-    PX1<PX2,
-    X1 is PX1+1,
-    X2 is PX2-1,
+    X1 is min(PX1,PX2)+1,
+    X2 is max(PX1,PX2)-1,
     findall((X,Y), between(X1, X2, X), Posicoes).
-
 
 % 2.6 Predicado cria_ponte/3
 
@@ -114,7 +103,7 @@ caminho_livre(_, _, Posicoes, ilha(_,Pos_I), ilha(_,Pos_Vz)) :-
 % 2.8 Predicado actualiza_vizinhas_entrada/5
 
 actualiza_vizinhas_entrada(Pos1, Pos2, Posicoes, [Ilha, Vizinhas, Pontes], [Ilha, NovasVizinhas, Pontes]) :-
-    findall(Vizinha, (member(Vizinha,Vizinhas), caminho_livre(Pos1,Pos2,Posicoes, Ilha, Vizinha)), NovasVizinhas).
+    include(caminho_livre(Pos1,Pos2,Posicoes,Ilha), Vizinhas, NovasVizinhas).
 
 % 2.9 Predicado actualiza_vizinhas_apos_pontes/4
 
@@ -138,7 +127,7 @@ tira_ilhas_terminadas_entrada(Ilhas_term, [Ilha, Vizinhas, Pontes], [Ilha, Novas
 % 2.12 Predicado tira_ilhas_terminadas/3
 
 tira_ilhas_terminadas(Estado, Ilhas_term, Novo_estado) :-
-    findall(NovaEntrada, (member(Entrada, Estado),  tira_ilhas_terminadas_entrada(Ilhas_term,Entrada, NovaEntrada)), Novo_estado).
+    maplist(tira_ilhas_terminadas_entrada(Ilhas_term), Estado, Novo_estado).
 
 % 2.13 Predicado marca_ilhas_terminadas_entrada/3
 
@@ -151,7 +140,7 @@ marca_ilhas_terminadas_entrada(_,Entrada,Entrada).
 % 2.14 Predicado marca_ilhas_terminadas/3
 
 marca_ilhas_terminadas(Estado, Ilhas_term, Novo_estado) :-
-    findall(NovaEntrada, (member(Entrada, Estado),  marca_ilhas_terminadas_entrada(Ilhas_term,Entrada, NovaEntrada)), Novo_estado).
+    maplist(marca_ilhas_terminadas_entrada(Ilhas_term), Estado, Novo_estado).
 
 % 2.15 Predicado trata_ilhas_terminadas/2
 
