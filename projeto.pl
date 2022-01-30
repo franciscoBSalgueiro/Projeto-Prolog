@@ -8,45 +8,42 @@ extrai_ilhas_linha(_, [], [], _).
 
 extrai_ilhas_linha(N_L, [Coluna | Linha], [ilha(Coluna,(N_L,N_C)) | Ilhas], N_C) :-
     Coluna\=0,
-    N_C2 is N_C+1,
-    extrai_ilhas_linha(N_L, Linha, Ilhas, N_C2).
+    !,
+    N_C_1 is N_C+1,
+    extrai_ilhas_linha(N_L, Linha, Ilhas, N_C_1).
 
-extrai_ilhas_linha(N_L, [Coluna | Linha], Ilhas, N_C) :-
-    Coluna==0,
-    N_C2 is N_C+1,
-    extrai_ilhas_linha(N_L, Linha, Ilhas, N_C2).
+extrai_ilhas_linha(N_L, [_ | Linha], Ilhas, N_C) :-
+    N_C_1 is N_C+1,
+    extrai_ilhas_linha(N_L, Linha, Ilhas, N_C_1).
 
 % 2.2 Predicado ilhas/2
 
 ilhas(Puz, Ilhas_Final) :- ilhas(Puz, Ilhas, 1),
-    append(Ilhas, Ilhas_Final).
+    append(Ilhas, Ilhas_Final). % usa-se o append para eliminar as listas vazias
 
 ilhas([],[],_).
 
 ilhas([L | R], [Ilhas_Linha | Ilhas_Resto], I) :-
     extrai_ilhas_linha(I, L, Ilhas_Linha),
-    NI is I+1,
-    ilhas(R, Ilhas_Resto, NI).
+    I_1 is I+1,
+    ilhas(R, Ilhas_Resto, I_1).
 
 % 2.3 Predicado vizinhas/3
 
-cima(PX1, PY1, ilha(_, (PY2, PX1))) :-
-    PY1>PY2.
+cima(PX1, PY1, ilha(_, (PY2, PX1))) :- PY1>PY2.
 
-baixo(PX1, PY1, ilha(_, (PY2, PX1))) :-
-    PY1<PY2.
+baixo(PX1, PY1, ilha(_, (PY2, PX1))) :- PY1<PY2.
 
-esquerda(PX1, PY1, ilha(_, (PY1, PX2))) :-
-    PX1>PX2.
+esquerda(PX1, PY1, ilha(_, (PY1, PX2))) :- PX1>PX2.
 
-direita(PX1, PY1, ilha(_, (PY1, PX2))) :-
-    PX1<PX2.
+direita(PX1, PY1, ilha(_, (PY1, PX2))) :- PX1<PX2.
 
-ultimo_em_lista(Ilhas,UltimaLista) :-
-    (last(Ilhas, Ultima), UltimaLista = [Ultima] ; UltimaLista = []).
+primeiro_em_lista([],[]).
+primeiro_em_lista([P | _],[P]).
 
-primeiro_em_lista(Ilhas,UltimaLista) :-
-    (Ilhas = [Ultima | _], UltimaLista = [Ultima] ; UltimaLista = []).
+ultimo_em_lista([],[]).
+ultimo_em_lista(Ilhas,[Ultima]) :-
+    last(Ilhas, Ultima).
 
 vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
     include(cima(PX1, PY1),Ilhas,IlhaCima),
@@ -60,7 +57,8 @@ vizinhas(Ilhas, ilha(_, (PY1, PX1)), Vizinhas) :-
 
     include(direita(PX1, PY1),Ilhas,IlhaDireita),
     primeiro_em_lista(IlhaDireita,Direita),
-    
+
+    % o append eh usado para eliminar listas vazias
     append([Cima, Esquerda, Direita, Baixo], Vizinhas).
 
 % 2.4 Predicado estado/2
@@ -75,15 +73,13 @@ estado([Ilha | Resto], [[Ilha, Vizinhas, []] | RestoEstado], Ilhas) :-
 
 % 2.5 Predicado posicoes_entre/3
 
-posicoes_entre((X, PY1), (X, PY2), Posicoes) :-
-    Y1 is min(PY1,PY2)+1,
-    Y2 is max(PY1,PY2)-1,
-    findall((X,Y), between(Y1, Y2, Y), Posicoes).
-
-posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
-    X1 is min(PX1,PX2)+1,
-    X2 is max(PX1,PX2)-1,
-    findall((X,Y), between(X1, X2, X), Posicoes).
+posicoes_entre((PX1, PY1), (PX2, PY2), Posicoes) :-
+    (PX1=PX2 ; PY1=PY2),
+    X1 is min(PX1,PX2),
+    X2 is max(PX1,PX2),
+    Y1 is min(PY1,PY2),
+    Y2 is max(PY1,PY2),
+    findall((X,Y), (between(X1, X2, X), between(Y1, Y2, Y), (X,Y)\=(PX1, PY1),(X,Y)\=(PX2, PY2)), Posicoes).
 
 % 2.6 Predicado cria_ponte/3
 
@@ -107,12 +103,9 @@ actualiza_vizinhas_entrada(Pos1, Pos2, Posicoes, [Ilha, Vizinhas, Pontes], [Ilha
 
 % 2.9 Predicado actualiza_vizinhas_apos_pontes/4
 
-actualiza_vizinhas_apos_pontes([],_,_,[]).
-
-actualiza_vizinhas_apos_pontes([Entrada | Resto_Estado], Pos1, Pos2, [NovaEntrada | Resto_Novo_Estado]) :-
+actualiza_vizinhas_apos_pontes(Estado, Pos1, Pos2, Novo_estado) :-
     posicoes_entre(Pos1, Pos2, Posicoes),
-    actualiza_vizinhas_entrada(Pos1, Pos2, Posicoes, Entrada, NovaEntrada),
-    actualiza_vizinhas_apos_pontes(Resto_Estado, Pos1, Pos2, Resto_Novo_Estado).
+    maplist(actualiza_vizinhas_entrada(Pos1,Pos2,Posicoes), Estado, Novo_estado).
 
 % 2.10 Predicado ilhas_terminadas/2
 
@@ -132,8 +125,7 @@ tira_ilhas_terminadas(Estado, Ilhas_term, Novo_estado) :-
 % 2.13 Predicado marca_ilhas_terminadas_entrada/3
 
 marca_ilhas_terminadas_entrada(Ilhas_term, [ilha(V, Pos), Vizinhas, Pontes], [ilha('X', Pos), Vizinhas, Pontes]) :-
-    member(ilha(V, Pos), Ilhas_term),
-    !.
+    member(ilha(V, Pos), Ilhas_term), !.
 
 marca_ilhas_terminadas_entrada(_,Entrada,Entrada).
 
@@ -151,27 +143,15 @@ trata_ilhas_terminadas(Estado, Novo_estado) :-
 
 % 2.16 Predicado junta_pontes/5
 
-adiciona_ponte_entrada([Ilha1, Vizinhas, _], Num_pontes, Ilha1, Ilha2, [Ilha1, Vizinhas, NovasPontes]) :-
-    Ilha1 = ilha(_,Pos1), Ilha2= ilha(_,Pos2),
-    cria_ponte(Pos1,Pos2,Ponte),
-    findall(Ponte, between(1, Num_pontes, _), NovasPontes),
-    !.
+adiciona_ponte_entrada(Num_pontes, Ilha1, Ilha2, [Ilha, Vizinhas, Pontes], [Ilha, Vizinhas, NovasPontes]) :-
+    (Ilha=Ilha1 ; Ilha=Ilha2) ->
+        Ilha1 = ilha(_,Pos1), Ilha2= ilha(_,Pos2),
+        cria_ponte(Pos1,Pos2,Ponte),
+        findall(Ponte, between(1, Num_pontes, _), NovasPontes)
+    ; NovasPontes = Pontes.
 
-adiciona_ponte_entrada([Ilha2, Vizinhas, _], Num_pontes, Ilha1, Ilha2, [Ilha2, Vizinhas, NovasPontes]) :-
-    Ilha1 = ilha(_,Pos1), Ilha2= ilha(_,Pos2),
-    cria_ponte(Pos1,Pos2,Ponte),
-    findall(Ponte, between(1, Num_pontes, _), NovasPontes),
-    !.
-
-adiciona_ponte_entrada([Ilha, Vizinhas, Pontes], _, Ilha1, Ilha2, [Ilha, Vizinhas, Pontes]) :-
-    Ilha\=Ilha1,
-    Ilha\=Ilha2.
-
-adiciona_ponte([], _ ,_ ,_, []).
-
-adiciona_ponte([Entrada | RestoEntrada], Num_pontes, Ilha1, Ilha2, [NovaEntrada | RestoNovaEntrada]) :-
-    adiciona_ponte_entrada(Entrada,Num_pontes,Ilha1,Ilha2,NovaEntrada),
-    adiciona_ponte(RestoEntrada, Num_pontes, Ilha1, Ilha2, RestoNovaEntrada).
+adiciona_ponte(Estado, Num_pontes, Ilha1, Ilha2, Novo_estado) :-
+    maplist(adiciona_ponte_entrada(Num_pontes,Ilha1,Ilha2), Estado, Novo_estado).
 
 junta_pontes(Estado, Num_pontes, Ilha1, Ilha2, Novo_estado) :-
     adiciona_ponte(Estado, Num_pontes, Ilha1, Ilha2, Estado2),
