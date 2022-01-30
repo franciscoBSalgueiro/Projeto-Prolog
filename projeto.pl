@@ -88,7 +88,7 @@ posicoes_entre((PX1, Y), (PX2, Y), Posicoes) :-
 % 2.6 Predicado cria_ponte/3
 
 cria_ponte((X1, Y1), (X2, Y2), ponte((X1, Y1), (X2, Y2))) :- (X1<X2 ; (X1==X2, Y1<Y2)), !.
-cria_ponte((X1, Y1), (X2, Y2), ponte((X2, Y2), (X1, Y1))) :- (X1>X2 ; (X1==X2, Y1>Y2)).
+cria_ponte(Pos1, Pos2, ponte(Pos2, Pos1)).
 
 % 2.7 Predicado caminho_livre/5
 
