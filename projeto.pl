@@ -143,18 +143,15 @@ trata_ilhas_terminadas(Estado, Novo_estado) :-
 
 % 2.16 Predicado junta_pontes/5
 
-adiciona_ponte_entrada(Num_pontes, Ilha1, Ilha2, [Ilha, Vizinhas, Pontes], [Ilha, Vizinhas, NovasPontes]) :-
+adiciona_ponte(Num_pontes, Ilha1, Ilha2, [Ilha, Vizinhas, Pontes], [Ilha, Vizinhas, NovasPontes]) :-
     (Ilha=Ilha1 ; Ilha=Ilha2) ->
         Ilha1 = ilha(_,Pos1), Ilha2= ilha(_,Pos2),
         cria_ponte(Pos1,Pos2,Ponte),
         findall(Ponte, between(1, Num_pontes, _), NovasPontes)
     ; NovasPontes = Pontes.
 
-adiciona_ponte(Estado, Num_pontes, Ilha1, Ilha2, Novo_estado) :-
-    maplist(adiciona_ponte_entrada(Num_pontes,Ilha1,Ilha2), Estado, Novo_estado).
-
 junta_pontes(Estado, Num_pontes, Ilha1, Ilha2, Novo_estado) :-
-    adiciona_ponte(Estado, Num_pontes, Ilha1, Ilha2, Estado2),
+    maplist(adiciona_ponte(Num_pontes,Ilha1,Ilha2), Estado, Estado2),
     Ilha1 = ilha(_, Pos1),
     Ilha2 = ilha(_, Pos2),
     actualiza_vizinhas_apos_pontes(Estado2,Pos1,Pos2,Estado3),
