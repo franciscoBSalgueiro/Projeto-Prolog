@@ -1,5 +1,7 @@
 % Francisco Salgueiro - num 103345
 
+:-[codigo_comum].
+
 % 2.1 Predicado extrai_ilhas_linha/3
 
 extrai_ilhas_linha(N_L, Linha, Ilhas) :- extrai_ilhas_linha(N_L, Linha, Ilhas, 1).
